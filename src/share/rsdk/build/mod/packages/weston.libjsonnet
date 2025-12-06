@@ -1,0 +1,77 @@
+local base_packages = import "categories/base.libjsonnet";
+
+function(suite,
+         product,
+         temp_dir,
+         vendor_packages,
+         linux_override,
+         firmware_override,
+) base_packages(suite,
+                product,
+                temp_dir,
+                vendor_packages,
+                linux_override,
+                firmware_override,
+) + {
+    mmdebstrap+: {
+        packages+:
+        [
+            "weston",
+            "xwayland",
+            "fonts-noto-cjk",
+            "fonts-noto-core",
+            "fonts-noto-mono",
+            "fonts-noto-ui-core",
+        ] +
+
+(if suite == "bookworm"
+then
+        // Install Debian 12 packages
+        [
+            "greetd",
+        ]
+else
+        []
+),
+        "customize-hooks"+:
+        [
+            // Create weston config directory
+            'mkdir -p "$1/etc/xdg/weston"',
+            // Copy weston.ini config for kiosk mode with fullscreen terminal
+            |||
+                cat > "$1/etc/xdg/weston/weston.ini" << 'EOF'
+[core]
+shell=kiosk-shell.so
+xwayland=true
+
+[terminal]
+font=Noto Sans Mono
+font-size=14
+
+[output]
+name=*
+mode=preferred
+transform=normal
+
+[shell]
+client=/usr/bin/weston-terminal --fullscreen
+EOF
+            |||,
+            // Configure greetd for auto-login
+            |||
+                mkdir -p "$1/etc/greetd"
+                cat > "$1/etc/greetd/config.toml" << 'EOF'
+[terminal]
+vt = 7
+
+[default_session]
+command = "weston --log=/tmp/weston.log"
+user = "radxa"
+EOF
+            |||,
+            // Enable greetd service
+            'mkdir -p "$1/usr/lib/systemd/system-preset"',
+            'echo "enable greetd.service" > "$1/usr/lib/systemd/system-preset/50-weston.preset"',
+        ]
+    },
+}

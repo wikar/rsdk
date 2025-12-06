@@ -44,8 +44,8 @@
         "product_name": "ROCK 4C+",
         "product_full_name": "ROCK 4C+",
         "soc": "rk3399t",
-        "supported_suite": ["bookworm", "trixie"],
-        "supported_edition": ["kde", "cli"]
+        "supported_suite": ["bookworm"],
+        "supported_edition": ["kde", "cli", "weston"]
     },
     {
         "product": "rock-4se",

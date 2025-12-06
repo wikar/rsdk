@@ -5,6 +5,7 @@ local xfce_packages = import "packages/xfce.libjsonnet";
 local core_packages = import "packages/core.libjsonnet";
 local i3_packages = import "packages/i3.libjsonnet";
 local gnome_packages = import "packages/gnome.libjsonnet";
+local weston_packages = import "packages/weston.libjsonnet";
 
 function(suite, edition, product, temp_dir, vendor_packages, linux_override, firmware_override,) (
 if edition == "cli"
@@ -28,4 +29,7 @@ then
 else if edition == "gnome"
 then
     gnome_packages(suite, product, temp_dir, vendor_packages, linux_override, firmware_override,)
+else if edition == "weston"
+then
+    weston_packages(suite, product, temp_dir, vendor_packages, linux_override, firmware_override,)
 )
