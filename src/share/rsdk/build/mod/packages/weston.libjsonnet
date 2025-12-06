@@ -1,4 +1,4 @@
-local desktop_packages = import "categories/desktop.libjsonnet";
+local base_packages = import "categories/base.libjsonnet";
 
 function(suite,
          product,
@@ -6,7 +6,7 @@ function(suite,
          vendor_packages,
          linux_override,
          firmware_override,
-) desktop_packages(suite,
+) base_packages(suite,
                 product,
                 temp_dir,
                 vendor_packages,
@@ -19,17 +19,11 @@ function(suite,
             "foot",
             "weston",
             "xwayland",
-        ] +
-
-(if suite == "bookworm"
-then
-        // Install Debian 12 packages
-        [
-            "greetd",
-        ]
-else
-        []
-),
+            "fonts-noto-cjk",
+            "fonts-noto-core",
+            "fonts-noto-mono",
+            "fonts-noto-ui-core",
+        ],
         "customize-hooks"+:
         [
             // Create weston config directory for user skeleton
@@ -52,14 +46,18 @@ transform=normal
 [shell]
 client=/usr/bin/foot --fullscreen
 EOF',
-            // Override greetd config to launch weston instead of sway
-            'cat > "$1/etc/greetd/config.toml" << EOF
-[terminal]
-vt = 7
-
-[default_session]
-command = "weston"
-user = "radxa"
+            // Configure autologin on TTY1 using systemd override
+            'mkdir -p "$1/etc/systemd/system/getty@tty1.service.d"',
+            'cat > "$1/etc/systemd/system/getty@tty1.service.d/override.conf" << EOF
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin radxa --noclear %I $TERM
+EOF',
+            // Create profile script to auto-start weston on TTY1
+            'cat > "$1/etc/profile.d/weston.sh" << EOF
+if [ -z "\\$DISPLAY" ] && [ -z "\\$WAYLAND_DISPLAY" ] && [ "\\$(tty)" = "/dev/tty1" ]; then
+    exec weston --log=/tmp/weston.log
+fi
 EOF',
         ]
     },
