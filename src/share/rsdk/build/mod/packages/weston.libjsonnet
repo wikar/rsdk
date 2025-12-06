@@ -38,8 +38,7 @@ else
             // Create weston config directory
             'mkdir -p "$1/etc/xdg/weston"',
             // Copy weston.ini config for kiosk mode with fullscreen terminal
-            |||
-                cat > "$1/etc/xdg/weston/weston.ini" << 'EOF'
+            'cat > "$1/etc/xdg/weston/weston.ini" << EOF
 [core]
 shell=kiosk-shell.so
 xwayland=true
@@ -55,20 +54,17 @@ transform=normal
 
 [shell]
 client=/usr/bin/weston-terminal --fullscreen
-EOF
-            |||,
+EOF',
             // Configure greetd for auto-login
-            |||
-                mkdir -p "$1/etc/greetd"
-                cat > "$1/etc/greetd/config.toml" << 'EOF'
+            'mkdir -p "$1/etc/greetd"
+cat > "$1/etc/greetd/config.toml" << EOF
 [terminal]
 vt = 7
 
 [default_session]
 command = "weston --log=/tmp/weston.log"
 user = "radxa"
-EOF
-            |||,
+EOF',
             // Enable greetd service
             'mkdir -p "$1/usr/lib/systemd/system-preset"',
             'echo "enable greetd.service" > "$1/usr/lib/systemd/system-preset/50-weston.preset"',
