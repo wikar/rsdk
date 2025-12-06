@@ -26,10 +26,10 @@ function(suite,
         ],
         "customize-hooks"+:
         [
-            // Create weston config directory for user skeleton
-            'mkdir -p "$1/etc/skel/.config/weston"',
+            // Create weston config for user skeleton
+            'mkdir -p "$1/etc/skel/.config"',
             // Copy weston.ini config for kiosk mode with fullscreen terminal
-            'cat > "$1/etc/skel/.config/weston/weston.ini" << EOF
+            'cat > "$1/etc/skel/.config/weston.ini" << EOF
 [core]
 shell=kiosk-shell.so
 xwayland=true
