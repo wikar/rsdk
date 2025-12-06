@@ -1,4 +1,4 @@
-local base_packages = import "categories/base.libjsonnet";
+local desktop_packages = import "categories/desktop.libjsonnet";
 
 function(suite,
          product,
@@ -6,7 +6,7 @@ function(suite,
          vendor_packages,
          linux_override,
          firmware_override,
-) base_packages(suite,
+) desktop_packages(suite,
                 product,
                 temp_dir,
                 vendor_packages,
@@ -16,12 +16,9 @@ function(suite,
     mmdebstrap+: {
         packages+:
         [
+            "foot",
             "weston",
             "xwayland",
-            "fonts-noto-cjk",
-            "fonts-noto-core",
-            "fonts-noto-mono",
-            "fonts-noto-ui-core",
         ] +
 
 (if suite == "bookworm"
@@ -35,10 +32,10 @@ else
 ),
         "customize-hooks"+:
         [
-            // Create weston config directory
-            'mkdir -p "$1/etc/xdg/weston"',
+            // Create weston config directory for user skeleton
+            'mkdir -p "$1/etc/skel/.config/weston"',
             // Copy weston.ini config for kiosk mode with fullscreen terminal
-            'cat > "$1/etc/xdg/weston/weston.ini" << EOF
+            'cat > "$1/etc/skel/.config/weston/weston.ini" << EOF
 [core]
 shell=kiosk-shell.so
 xwayland=true
@@ -53,21 +50,17 @@ mode=preferred
 transform=normal
 
 [shell]
-client=/usr/bin/weston-terminal --fullscreen
+client=/usr/bin/foot --fullscreen
 EOF',
-            // Configure greetd for auto-login
-            'mkdir -p "$1/etc/greetd"
-cat > "$1/etc/greetd/config.toml" << EOF
+            // Override greetd config to launch weston instead of sway
+            'cat > "$1/etc/greetd/config.toml" << EOF
 [terminal]
 vt = 7
 
 [default_session]
-command = "weston --log=/tmp/weston.log"
+command = "weston"
 user = "radxa"
 EOF',
-            // Enable greetd service
-            'mkdir -p "$1/usr/lib/systemd/system-preset"',
-            'echo "enable greetd.service" > "$1/usr/lib/systemd/system-preset/50-weston.preset"',
         ]
     },
 }
