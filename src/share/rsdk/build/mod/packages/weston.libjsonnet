@@ -41,10 +41,9 @@ font-size=14
 [output]
 name=*
 mode=preferred
-transform=normal
 
-[shell]
-client=/usr/bin/foot --fullscreen
+[autolaunch]
+path=/usr/bin/foot
 EOF',
             // Configure autologin on TTY1 using systemd override
             'mkdir -p "$1/etc/systemd/system/getty@tty1.service.d"',
